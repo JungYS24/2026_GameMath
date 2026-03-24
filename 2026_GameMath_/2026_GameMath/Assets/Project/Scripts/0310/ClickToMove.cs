@@ -13,6 +13,10 @@ public class ClickToMove : MonoBehaviour
     private bool isMoving;
     private bool isSprinting;
 
+    [Header("패링 상태")]
+    public bool isParryingLeft;  // Q 키 상태
+    public bool isParryingRight; // E 키 상태
+
     public void OnPoint(InputValue value) => mousePos = value.Get<Vector2>();
 
     public void OnClick(InputValue value)
@@ -38,6 +42,10 @@ public class ClickToMove : MonoBehaviour
         }
     }
 
+    // 패링
+    public void OnParryLeft(InputValue value) => isParryingLeft = value.isPressed;
+    public void OnParryRight(InputValue value) => isParryingRight = value.isPressed;
+
     void Update()
     {
         if (isMoving)
@@ -45,10 +53,24 @@ public class ClickToMove : MonoBehaviour
             Vector3 diff = targetPos - transform.position;
             float dist = Mathf.Sqrt(diff.x * diff.x + diff.y * diff.y + diff.z * diff.z);
 
-            if (dist < 0.1f) isMoving = false;
+            if (dist < 0.1f)
+            {
+                isMoving = false;
+                return;
+            }
 
-            lastDir = diff / dist; // Normalize direction
-            transform.position += lastDir * (isSprinting ? moveSpeed * 2f : moveSpeed) * Time.deltaTime; //스프린트 이동속도 2배
+            // 방향 정규화 (Normalize) 직접 계산
+            lastDir = diff / dist;
+
+            // 스프린트 시 속도 2배 적용
+            float currentSpeed = isSprinting ? moveSpeed * 2f : moveSpeed;
+            transform.position += lastDir * currentSpeed * Time.deltaTime;
+
+            // 이동 방향을 바라보게 회전 (선택 사항)
+            if (lastDir != Vector3.zero)
+            {
+                transform.forward = lastDir;
+            }
         }
     }
 }
