@@ -1,27 +1,47 @@
 using UnityEngine;
+using UnityEngine.UI; 
+using TMPro; 
 
 public class DiceSimulator : MonoBehaviour
 {
-    int[] counts = new int[6];
-    public int trials = 100;
+    [Header("설정")]
+    public int trials = 100; // 시뮬레이션 횟수
 
-    void Start()
+    [Header("UI 연결")]
+    public TextMeshProUGUI resultText; // 결과를 출력할 TMP 텍스트
+
+    // 버튼에 연결할 함수
+    public void Simulate()
     {
-        // 지정된 횟수(trials)만큼 주사위를 던짐
+        if (resultText == null)
+        {
+            Debug.LogError("결과를 표시할 Text UI가 연결되지 않았습니다.");
+            return;
+        }
+
+        // 1. 데이터 초기화 (버튼 누를 때마다 새로 계산)
+        int[] counts = new int[6];
+        string report = $"<size=120%>시뮬레이션 결과 ({trials}회)</size>\n\n";
+
+        // 2. 지정된 횟수만큼 주사위 던지기
         for (int i = 0; i < trials; i++)
         {
-            int result = Random.Range(1, 7); // 1~6 사이의 난수 발생
-            counts[result - 1]++; // 결과값에 해당하는 배열 인덱스의 카운트 증가
+            int result = Random.Range(1, 7);
+            counts[result - 1]++;
         }
 
-        // 결과 통계 출력
+        // 3. 결과 문자열 생성 및 UI 출력
         for (int i = 0; i < counts.Length; i++)
         {
-            // 확률 계산 (실수형 변환 주의)
             float percent = (float)counts[i] / trials * 100f;
 
-            // 보간 문자열($)과 서식 지정자(F2)를 사용한 로그 출력
-            Debug.Log($"{i + 1}: {counts[i]}회 ({percent:F2}%)");
+            // UI에 표시될 텍스트 누적
+            report += $"{i + 1}번 눈: {counts[i]}회 ({percent:F1}%)\n";
         }
+
+        // 4. 최종적으로 UI 텍스트 컴포넌트에 할당
+        resultText.text = report;
+
+        Debug.Log($"{trials}회 시뮬레이션 완료");
     }
 }
